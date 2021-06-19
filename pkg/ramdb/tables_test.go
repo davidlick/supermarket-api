@@ -1,42 +1,46 @@
 package ramdb
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTable_NewIndex(t *testing.T) {
+func TestTable_CreateIndex(t *testing.T) {
 	tests := []struct {
 		test          string
 		table         table
-		onColumn      string
+		column        string
 		expectedError error
 	}{
 		{
-			test:          "it should return ErrInvalidIndex if onColumn is empty",
+			test:          "it should return ErrInvalidIndex if column is empty",
 			expectedError: ErrInvalidIndex,
 		},
 		{
-			test: "it should return ErrIndexExists if an index exists for onColumn",
-			table: table{indexes: map[string]*index{
-				"test_column": &index{},
-			}},
-			onColumn:      "test_column",
+			test: "it should return ErrIndexExists if an index exists for column",
+			table: table{
+				mutex: &sync.Mutex{},
+				indexes: map[string]*index{
+					"test_column": &index{},
+				}},
+			column:        "test_column",
 			expectedError: ErrIndexExists,
 		},
 		{
 			test: "it should create an index successfully",
 			table: table{
+				mutex:   &sync.Mutex{},
 				indexes: make(map[string]*index),
 			},
-			onColumn: "test_column",
+			column: "test_column",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.test, func(t *testing.T) {
-			err := tc.table.CreateIndex(tc.onColumn)
+			err := tc.table.CreateIndex(tc.column)
 
 			assert.Equal(t, tc.expectedError, err)
 		})
