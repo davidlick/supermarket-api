@@ -10,6 +10,12 @@ integration-test:
 all-test:
 	go test ./...
 
+test-coverage:
+	go test -cover ./...
+
+cover-report:
+	go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
+
 build:
 	go build -o supermarket-api cmd/api/*.go
 
@@ -17,4 +23,4 @@ run:
 	go run cmd/api/*.go
 
 clean:
-	rm ./supermarket-api
+	rm ./supermarket-api ./coverage.out
