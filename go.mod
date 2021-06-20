@@ -3,6 +3,7 @@ module github.com/davidlick/supermarket-api
 go 1.16
 
 require (
+	github.com/Rhymond/go-money v1.0.2 // indirect
 	github.com/go-chi/chi v1.5.4 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/btree v1.0.1 // indirect
