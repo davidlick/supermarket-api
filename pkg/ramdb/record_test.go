@@ -12,7 +12,7 @@ func TestRecord_NewRecord(t *testing.T) {
 		key            string
 		keyColumn      string
 		data           interface{}
-		expectedRecord *record
+		expectedRecord *Record
 		expectedError  string
 	}{
 		{
@@ -29,7 +29,7 @@ func TestRecord_NewRecord(t *testing.T) {
 			key:       "test-record",
 			keyColumn: "test-column",
 			data:      struct{}{},
-			expectedRecord: &record{
+			expectedRecord: &Record{
 				serialized: []byte("{}"),
 				key:        "test-record",
 				keyColumn:  "test-column",

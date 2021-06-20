@@ -27,7 +27,7 @@ indog := HotDog{
 	Brat: true,
 }
 
-// Create a new record and insert.
+// Create a new Record and insert.
 rec, _ := ramdb.NewRecord("1", "frank_id", indog)
 _ = db.From("hotdogs").Insert(rec)
 
