@@ -87,7 +87,7 @@ func initProduce(produceSvc http.ProduceService) {
 
 	b, err := ioutil.ReadAll(f)
 	if err != nil {
-		logger.Fatal("could not read file: %s", cfg.DMLInitFile)
+		logger.Fatalf("could not read file: %s", cfg.DMLInitFile)
 	}
 
 	var items []produce.Item
