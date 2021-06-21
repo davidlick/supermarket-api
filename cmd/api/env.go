@@ -6,9 +6,10 @@ import (
 )
 
 type config struct {
-	Env      string `default:"dev"`
-	APIPort  int    `default:3000`
-	LogLevel string `default:"debug"`
+	Env         string `default:"dev"`
+	APIPort     int    `default:3000`
+	LogLevel    string `default:"debug"`
+	DMLInitFile string
 }
 
 func load() (cfg config, err error) {
