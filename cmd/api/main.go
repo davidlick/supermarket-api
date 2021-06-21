@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/davidlick/supermarket-api/internal/http"
+	"github.com/davidlick/supermarket-api/internal/produce"
+	"github.com/davidlick/supermarket-api/pkg/ramdb"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,7 +36,15 @@ func init() {
 }
 
 func main() {
-	server := http.NewServer(cfg.APIPort, logger, cfg.Env)
+	db := ramdb.NewDatabase()
+	err = db.CreateTable("produce", produce.KeyProduceCode)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	produceSvc := produce.NewService(db.From("produce"))
+
+	server := http.NewServer(cfg.APIPort, logger, cfg.Env, produceSvc)
 
 	// Allow app to listen for OS Interrupts and SIGTERMS.
 	serverErrors := make(chan error, 1)
