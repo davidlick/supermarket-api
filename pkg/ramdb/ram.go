@@ -1,5 +1,7 @@
 package ramdb
 
+import "sync"
+
 type database struct {
 	tables map[string]*table
 }
@@ -28,7 +30,9 @@ func (db *database) CreateTable(tablename string, indexOnColumns ...string) erro
 	}
 
 	tbl := &table{
-		exists: true,
+		exists:  true,
+		mutex:   &sync.Mutex{},
+		indexes: make(map[string]*index),
 	}
 
 	for _, onColumn := range indexOnColumns {

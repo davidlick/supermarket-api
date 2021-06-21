@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -43,6 +45,7 @@ func main() {
 	}
 
 	produceSvc := produce.NewService(db.From("produce"))
+	initProduce(produceSvc)
 
 	server := http.NewServer(cfg.APIPort, logger, cfg.Env, produceSvc)
 
@@ -68,5 +71,33 @@ func main() {
 		if err != nil {
 			log.Fatalf("error shutting down http server: %v", err.Error())
 		}
+	}
+}
+
+func initProduce(produceSvc http.ProduceService) {
+	if cfg.DMLInitFile == "" {
+		logger.Info("no init file provided, database will be empty")
+		return
+	}
+
+	f, err := os.Open(cfg.DMLInitFile)
+	if err != nil {
+		logger.Fatalf("could not open file: %s", cfg.DMLInitFile)
+	}
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		logger.Fatalf("could not read file: %s", cfg.DMLInitFile)
+	}
+
+	var items []produce.Item
+	err = json.Unmarshal(b, &items)
+	if err != nil {
+		logger.Fatalf("could not unmarshal items: %v", err)
+	}
+
+	err = produceSvc.Add(items)
+	if err != nil {
+		logger.Fatal("failed to add items to produce service")
 	}
 }
