@@ -1,7 +1,9 @@
 package http
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/Rhymond/go-money"
 	"github.com/davidlick/supermarket-api/internal/produce"
+	"github.com/go-chi/chi"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -136,6 +139,71 @@ func TestServer_handleGetAllProduce(t *testing.T) {
 			s := NewServer(3000, noopLogger, "test", mockProduceSvc)
 
 			handler := http.HandlerFunc(s.handleGetAllProduce)
+			handler.ServeHTTP(w, r)
+
+			tc.assertFunc(t, w)
+		})
+	}
+}
+
+func TestServer_handleDeleteProduce(t *testing.T) {
+	tests := []struct {
+		test        string
+		produceCode string
+		expectFunc  func(mockProduceSvc *MockProduceService)
+		assertFunc  func(t *testing.T, w *httptest.ResponseRecorder)
+	}{
+		{
+			test:        "it should respond no content when successful",
+			produceCode: "test-code",
+			expectFunc: func(mockProduceSvc *MockProduceService) {
+				mockProduceSvc.EXPECT().Remove(produce.Item{Code: "test-code"}).Return(nil)
+			},
+			assertFunc: func(t *testing.T, w *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusNoContent, w.Code)
+			},
+		},
+		{
+			test:        "it should respond internal server error if adding to service fails",
+			produceCode: "test-code",
+			expectFunc: func(mockProduceSvc *MockProduceService) {
+				mockProduceSvc.EXPECT().Remove(produce.Item{Code: "test-code"}).Return(errors.New("test error"))
+			},
+			assertFunc: func(t *testing.T, w *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusInternalServerError, w.Code)
+			},
+		},
+		{
+			test:       "it should respond bad request if no produce code is supplied",
+			expectFunc: func(mockProduceSvc *MockProduceService) {},
+			assertFunc: func(t *testing.T, w *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusBadRequest, w.Code)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.test, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			r := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/v1/produce/%s", tc.produceCode), nil)
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("produceCode", tc.produceCode)
+			ctx := context.WithValue(context.Background(), chi.RouteCtxKey, rctx)
+
+			r = r.WithContext(ctx)
+			w := httptest.NewRecorder()
+
+			noopLogger := logrus.New()
+			noopLogger.SetOutput(ioutil.Discard)
+
+			mockProduceSvc := NewMockProduceService(ctrl)
+			tc.expectFunc(mockProduceSvc)
+
+			s := NewServer(3000, noopLogger, "test", mockProduceSvc)
+
+			handler := http.HandlerFunc(s.handleDeleteProduce)
 			handler.ServeHTTP(w, r)
 
 			tc.assertFunc(t, w)
