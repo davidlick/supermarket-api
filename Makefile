@@ -22,5 +22,19 @@ build:
 run:
 	go run cmd/api/*.go
 
+docker-build:
+	docker build -t supermarket-api-image .
+
+docker-run:
+	docker run \
+		--rm \
+		--name supermarket-api \
+		-p "3000:3000" \
+		-e "ENV=dev" \
+		-e "APIPORT=3000" \
+		-e "LOGLEVEL=debug" \
+		-e "DMLINITFILE=../../defaultproduce.json" \
+		supermarket-api-image	
+	
 clean:
 	rm ./supermarket-api ./coverage.out
