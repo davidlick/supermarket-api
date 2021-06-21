@@ -14,6 +14,9 @@ func (s *server) produceGroup(r chi.Router) {
 		r.Route("/produce", func(r chi.Router) {
 			r.Get("/", s.handleGetAllProduce)
 			r.Post("/", s.handleAddProduce)
+			r.Route("/{produceCode}", func(r chi.Router) {
+				r.Delete("/", s.handleDeleteProduce)
+			})
 		})
 	})
 }
@@ -54,5 +57,26 @@ func (s *server) handleGetAllProduce(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.writeSuccess(ctx, w, items, http.StatusOK)
+	return
+}
+
+func (s *server) handleDeleteProduce(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	produceCode := chi.URLParam(r, "produceCode")
+	if produceCode == "" {
+		s.writeError(ctx, w, ErrUnrecognizedCode, http.StatusBadRequest)
+		return
+	}
+
+	err := s.produceSvc.Remove(produce.Item{
+		Code: produceCode,
+	})
+	if err != nil {
+		s.writeError(ctx, w, err, http.StatusInternalServerError)
+		return
+	}
+
+	s.writeSuccess(ctx, w, nil, http.StatusNoContent)
 	return
 }
