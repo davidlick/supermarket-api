@@ -16,15 +16,17 @@ type server struct {
 	port        int
 	logger      *logrus.Logger
 	environment string
+	produceSvc  ProduceService
 	server      *http.Server
 }
 
 // NewServer initializes a new server with the required configurations.
-func NewServer(port int, logger *logrus.Logger, environment string) *server {
+func NewServer(port int, logger *logrus.Logger, environment string, produceSvc ProduceService) *server {
 	return &server{
 		port:        port,
 		logger:      logger,
 		environment: environment,
+		produceSvc:  produceSvc,
 		server: &http.Server{
 			Addr:         fmt.Sprintf(":%d", port),
 			ReadTimeout:  60 * time.Second,
@@ -54,7 +56,7 @@ func (s *server) buildRoutes() http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
-			// r.Group(s.produceGroup)
+			s.produceGroup(r)
 		})
 	})
 
