@@ -12,6 +12,7 @@ import (
 func (s *server) produceGroup(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Route("/produce", func(r chi.Router) {
+			r.Get("/", s.handleGetAllProduce)
 			r.Post("/", s.handleAddProduce)
 		})
 	})
@@ -40,5 +41,18 @@ func (s *server) handleAddProduce(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.writeSuccess(ctx, w, nil, http.StatusCreated)
+	return
+}
+
+func (s *server) handleGetAllProduce(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	items, err := s.produceSvc.All()
+	if err != nil {
+		s.writeError(ctx, w, err, http.StatusInternalServerError)
+		return
+	}
+
+	s.writeSuccess(ctx, w, items, http.StatusOK)
 	return
 }
