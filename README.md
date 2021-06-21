@@ -54,12 +54,12 @@ DELETE|/v1/produce/{produceCode}|Delete the produce item with the given produceC
 This application was load tested using K6. To run the load test follow the installation documentation for K6 [here](https://k6.io/docs/getting-started/installation/). Once installed, make sure Supermarket-API is running and initiate the load test by running:
 
 ```
-$~ k6 run loadtests/load-test.js
+~$ k6 run loadtests/load-test.js
 ```
 
 The load test is configured to ramp up to 50 iterations per second over a 4 minute period and then maintain that load for a period of 1 minute. Each iteration adds a new unique produce item, and then queries all items catalogued in the service.
 
-Load test results below:
+Load test results:
 ```
 
           /\      |‾‾| /‾‾/   /‾‾/
