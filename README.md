@@ -39,7 +39,7 @@ To see a visual report of test coverage:
 
 ### Docker
 
-A Dockerfile is included to allow running in ECS or GKS. Make commands are included for building and running the containers. `make docker-run` sets local development variables and should not be used for production.
+A Dockerfile is included to allow running in ECS or GKE. Make commands are included for building and running the containers. `make docker-run` sets local development variables and should not be used for production.
 
 ## API Spec
 **Method**|**Endpoint**|**Description**|**Request Body**|**Response**
